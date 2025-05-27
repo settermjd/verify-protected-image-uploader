@@ -1,0 +1,9 @@
+{
+    "require": {
+        "asgrim/mini-mezzio": "^2.2",
+        "laminas/laminas-servicemanager": "^4.4",
+        "mezzio/mezzio-fastroute": "^3.13",
+        "mezzio/mezzio-twigrenderer": "^2.17",
+        "laminas/laminas-config-aggregator": "^1.18"
+    }
+}
