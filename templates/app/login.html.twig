@@ -1,0 +1,24 @@
+{% extends '@layout/default.html.twig' %}
+
+{% block header %}Login{% endblock %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+    <section class="text-slate-700/75">
+        <form class="mt-6 gap-y-4 max-w-3xl" method="post" enctype="application/x-www-form-urlencoded">
+            <label class="mb-2 block font-medium " for="username">
+                Username:
+            </label>
+            <input type="text"
+                   name="username"
+                   id="username"
+                   required
+                   class="w-full px-6 py-3 border-2 border-slate-200 rounded-sm">
+            <input type="submit"
+                   name="submit"
+                   value="Login"
+                   class="bg-slate-800 hover:bg-slate-700 py-3 px-6 text-white rounded-sm hover:cursor-pointer transition ease-in-out delay-150 duration-300 focus:inset-shadow-sm hover:inset-shadow-sm mt-4">
+        </form>
+    </section>
+{% endblock %}

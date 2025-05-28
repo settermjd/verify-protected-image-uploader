@@ -1,0 +1,34 @@
+{% extends '@layout/default.html.twig' %}
+
+{% block header %}Upload an image{% endblock %}
+
+{% block title %}Upload a PNG or JPG Image{% endblock %}
+
+{% block content %}
+    <section class="text-slate-700/75 mt-6">
+        <div class="hidden mt-4 flex flex-row gap-x-2 items-center p-3 border-0 border-green-300 bg-green-100 rounded-md text-green-700">
+            <img src="/images/icons/success.png" alt="success icon" width="32" height="32">
+            <p class="">Image was successfully uploaded</p>
+        </div>
+        <div class="hidden mt-4 flex flex-row gap-x-2 items-center p-3 border-0 border-red-300 bg-red-100 rounded-md text-red-700">
+            <img src="/images/icons/cancel.png" alt="upload fail icon" width="32" height="32">
+            <p class="">Image could not be uploaded</p>
+        </div>
+        <form class="mt-4 gap-y-4 max-w-3xl" method="post" enctype="multipart/form-data">
+            <label class="mb-2 block font-medium " for="file">
+                File name:
+            </label>
+            <input type="file"
+                   name="file"
+                   id="file"
+                   accept="image/png, image/jpeg"
+                   required
+                   class="sm:w-full px-6 py-3 border-2 border-slate-200 rounded-sm">
+            <p class="text-sm mt-1 ml-1 text-slate-500 text-left">Only PNG and JPG/JPEG files are supported.</p>
+            <input type="submit"
+                   name="submit"
+                   value="Upload File"
+                   class="bg-slate-800 hover:bg-slate-700 py-3 px-6 text-white rounded-sm hover:cursor-pointer transition ease-in-out delay-150 duration-300 focus:inset-shadow-sm hover:inset-shadow-sm mt-7">
+        </form>
+    </section>
+{% endblock %}
