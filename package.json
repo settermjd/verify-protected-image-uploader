@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@tailwindcss/cli": "^4.0.15",
+    "tailwindcss": "^4.0.15"
+  },
+  "scripts": {
+    "run-dev-minify": "npx @tailwindcss/cli -i ./src/asset/css/styles.css -o ./public/css/styles.css --watch --minify"
+  }
+}

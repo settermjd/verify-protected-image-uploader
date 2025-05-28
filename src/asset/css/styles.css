@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@layer base {
+    address {
+        @apply not-italic;
+    }
+}
+
+@theme {
+    --color-twilio-red: oklch(61.73% 0.2289 23.03);
+}
