@@ -35,7 +35,7 @@ readonly class TwilioVerificationService
         return $this->verifyService
             ->verificationChecks
             ->create([
-                "to"   => "+" . $recipient,
+                "to"   => $recipient,
                 "code" => $code,
             ]);
     }
