@@ -2,29 +2,29 @@
 
 declare(strict_types=1);
 
-use Laminas\ConfigAggregator\ConfigAggregator;
-use Laminas\Diactoros\Response\HtmlResponse;
-use Laminas\Diactoros\Response\TextResponse;
-use Laminas\ServiceManager\ServiceManager;
+use App\Handler\LoginHandler;
+use App\Handler\UploadHandler;
+use App\Handler\VerifyHandler;
 use Asgrim\MiniMezzio\AppFactory;
+use Laminas\ConfigAggregator\ConfigAggregator;
+use Laminas\ServiceManager\AbstractFactory\ReflectionBasedAbstractFactory;
+use Laminas\ServiceManager\ServiceManager;
 use Mezzio\Router\FastRouteRouter;
 use Mezzio\Router\Middleware\DispatchMiddleware;
 use Mezzio\Router\Middleware\RouteMiddleware;
-use Mezzio\Template\TemplateRendererInterface;
+use Mezzio\Router\RouterInterface;
 use Mezzio\Twig\ConfigProvider as MezzioTwigConfigProvider;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$config = new ConfigAggregator([
+$config                             = new ConfigAggregator([
     MezzioTwigConfigProvider::class,
-    new class()
+    new class ()
     {
-        public function __invoke(): array {
+        public function __invoke(): array
+        {
             return [
-                'templates'    => [
+                'templates' => [
                     'paths' => [
                         'app'    => [__DIR__ . '/../templates/app'],
                         'error'  => [__DIR__ . '/../templates/error'],
@@ -37,67 +37,21 @@ $config = new ConfigAggregator([
 ])->getMergedConfig();
 $dependencies                       = $config['dependencies'];
 $dependencies['services']['config'] = $config;
-$container = new ServiceManager($dependencies);
+$container                          = new ServiceManager($dependencies);
+$container->addAbstractFactory(new ReflectionBasedAbstractFactory());
+$container->setFactory(RouterInterface::class, static function () {
+    return new FastRouteRouter();
+});
 
-$router = new FastRouteRouter();
-$app = AppFactory::create($container, $router);
-$app->pipe(new RouteMiddleware($router));
-$app->pipe(new DispatchMiddleware());
+$app = AppFactory::create($container, $container->get(RouterInterface::class));
+$app->pipe(RouteMiddleware::class);
+$app->pipe(DispatchMiddleware::class);
 
 /**
  * Define the application's routes
  */
-$app->route(
-    '/login',
-    new class($container->get(TemplateRendererInterface::class)) implements RequestHandlerInterface {
-        public function __construct(private TemplateRendererInterface $renderer)
-        {
-        }
-
-        public function handle(ServerRequestInterface $request): ResponseInterface
-        {
-            if ($request->getMethod() === 'GET') {
-                return new HtmlResponse($this->renderer->render('app::login', []));
-            }
-        }
-    },
-    ['GET', 'POST'],
-    'login'
-);
-
-$app->route(
-    '/verify',
-    new class($container->get(TemplateRendererInterface::class)) implements RequestHandlerInterface {
-        public function __construct(private TemplateRendererInterface $renderer)
-        {
-        }
-
-        public function handle(ServerRequestInterface $request): ResponseInterface
-        {
-            if ($request->getMethod() === 'GET') {
-                return new HtmlResponse($this->renderer->render('app::verify', []));
-            }
-        }
-    },
-    ['GET', 'POST'],
-    'verify');
-
-$app->route(
-    '/upload',
-    new class ($container->get(TemplateRendererInterface::class))implements RequestHandlerInterface {
-        public function __construct(private TemplateRendererInterface $renderer)
-        {
-        }
-
-        public function handle(ServerRequestInterface $request): ResponseInterface
-        {
-            if ($request->getMethod() === 'GET') {
-                return new HtmlResponse($this->renderer->render('app::upload', []));
-            }
-        }
-    },
-    ['GET', 'POST'],
-    'upload'
-);
+$app->route('/login', LoginHandler::class, ['GET', 'POST'], 'login');
+$app->route('/verify', VerifyHandler::class, ['GET', 'POST'], 'verify');
+$app->route('/upload', UploadHandler::class, ['GET', 'POST'], 'upload');
 
 $app->run();
