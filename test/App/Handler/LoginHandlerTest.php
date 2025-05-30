@@ -8,6 +8,10 @@ use App\Handler\LoginHandler;
 use App\Service\TwilioVerificationService;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
+use Mezzio\Flash\FlashMessageMiddleware;
+use Mezzio\Flash\FlashMessagesInterface;
+use Mezzio\Session\SessionInterface;
+use Mezzio\Session\SessionMiddleware;
 use Mezzio\Template\TemplateRendererInterface;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\MockObject\Exception;
@@ -18,13 +22,17 @@ use Twilio\Rest\Verify\V2\Service\VerificationInstance;
 
 class LoginHandlerTest extends TestCase
 {
-    private TemplateRendererInterface&MockObject $template;
+    private FlashMessagesInterface&MockObject $flashMessage;
     private ServerRequestInterface&MockObject $request;
+    private SessionInterface&MockObject $session;
+    private TemplateRendererInterface&MockObject $template;
 
     public function setUp(): void
     {
-        $this->template = $this->createMock(TemplateRendererInterface::class);
-        $this->request  = $this->createMock(ServerRequestInterface::class);
+        $this->flashMessage = $this->createMock(FlashMessagesInterface::class);
+        $this->request      = $this->createMock(ServerRequestInterface::class);
+        $this->template     = $this->createMock(TemplateRendererInterface::class);
+        $this->session      = $this->createMock(SessionInterface::class);
     }
 
     public function testRendersTemplateOnGetRequest(): void
@@ -35,6 +43,52 @@ class LoginHandlerTest extends TestCase
             ->with('app::login', [])
             ->willReturn('');
 
+        $this->request
+            ->expects($this->once())
+            ->method('getMethod')
+            ->willReturn('GET');
+        $this->request
+            ->expects($this->atLeast(2))
+            ->method('getAttribute')
+            ->willReturnOnConsecutiveCalls(
+                $this->session,
+                $this->flashMessage
+            );
+
+        $this->session
+            ->expects($this->once())
+            ->method('unset')
+            ->with('username');
+
+        $twilioService = $this->createMock(TwilioVerificationService::class);
+
+        $response = new LoginHandler($this->template, $twilioService)->handle($this->request);
+        $this->assertInstanceOf(HtmlResponse::class, $response);
+    }
+
+    public function testRendersTemplateOnGetRequestWithFlashMessageIfSet(): void
+    {
+        $errorMessage = 'Username not available in request';
+
+        $this->template
+            ->expects($this->once())
+            ->method('render')
+            ->with('app::login', ['error' => $errorMessage])
+            ->willReturn('');
+
+        $this->flashMessage
+            ->expects($this->once())
+            ->method('getFlash')
+            ->with('error')
+            ->willReturn($errorMessage);
+
+        $this->request
+            ->expects($this->atLeast(2))
+            ->method('getAttribute')
+            ->willReturnOnConsecutiveCalls(
+                $this->session,
+                $this->flashMessage
+            );
         $this->request
             ->expects($this->once())
             ->method('getMethod')
@@ -91,6 +145,13 @@ class LoginHandlerTest extends TestCase
 
     public function testHandlesLoginRequestWhenFormDataIsValidAndHasMatchingUser(): void
     {
+        $username = 'user@example.org';
+
+        $this->session
+            ->expects($this->once())
+            ->method('set')
+            ->with('username', $username);
+
         $this->request
             ->expects($this->once())
             ->method('getMethod')
@@ -98,10 +159,15 @@ class LoginHandlerTest extends TestCase
         $this->request
             ->expects($this->once())
             ->method('getParsedBody')
-            ->willReturn(['username' => 'user@example.org']);
+            ->willReturn(['username' => $username]);
+        $this->request
+            ->expects($this->once())
+            ->method('getAttribute')
+            ->with(SessionMiddleware::SESSION_ATTRIBUTE)
+            ->willReturn($this->session);
 
         $users = [
-            'user@example.org' => '+61493123456',
+            $username => '+61493123456',
         ];
 
         $verificationInstance = $this->createMock(VerificationInstance::class);
@@ -115,7 +181,7 @@ class LoginHandlerTest extends TestCase
         $twilioService
             ->expects($this->once())
             ->method('sendVerificationCode')
-            ->with($users['user@example.org'], "SMS")
+            ->with($users[$username], "sms")
             ->willReturn($verificationInstance);
 
         $response = new LoginHandler($this->template, $twilioService, $users)->handle($this->request);

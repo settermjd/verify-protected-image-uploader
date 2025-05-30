@@ -9,6 +9,8 @@ use Twilio\Rest\Verify\V2\Service\VerificationCheckInstance;
 use Twilio\Rest\Verify\V2\Service\VerificationInstance;
 use Twilio\Rest\Verify\V2\ServiceContext;
 
+use function strtolower;
+
 readonly class TwilioVerificationService
 {
     private ServiceContext $verifyService;
@@ -21,11 +23,11 @@ readonly class TwilioVerificationService
             ->services($this->serviceId);
     }
 
-    public function sendVerificationCode(string $recipient, string $channel = 'SMS'): VerificationInstance
+    public function sendVerificationCode(string $recipient, string $channel = 'sms'): VerificationInstance
     {
         return $this->verifyService
             ->verifications
-            ->create($recipient, $channel);
+            ->create($recipient, strtolower($channel));
     }
 
     public function validateVerificationCode(

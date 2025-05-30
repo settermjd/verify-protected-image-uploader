@@ -7,6 +7,8 @@ namespace App\Handler;
 use App\Service\TwilioVerificationService;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
+use Mezzio\Session\SessionInterface;
+use Mezzio\Session\SessionMiddleware;
 use Mezzio\Template\TemplateRendererInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -18,6 +20,8 @@ use function in_array;
 
 final readonly class LoginHandler implements RequestHandlerInterface
 {
+    use FlashMessagesTrait;
+
     /**
      * @param array<string,string> $users
      */
@@ -33,8 +37,17 @@ final readonly class LoginHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        /** @var SessionInterface $session */
+        $session = $request->getAttribute(SessionMiddleware::SESSION_ATTRIBUTE);
+
         if ($request->getMethod() === 'GET') {
-            return new HtmlResponse($this->renderer->render('app::login', []));
+            $data         = [];
+            $errorMessage = $this->getFlash($request, 'error');
+            if ($errorMessage !== null) {
+                $data['error'] = $errorMessage;
+            }
+            $session->unset('username');
+            return new HtmlResponse($this->renderer->render('app::login', $data));
         }
 
         $formData = $request->getParsedBody();
@@ -49,6 +62,7 @@ final readonly class LoginHandler implements RequestHandlerInterface
 
         $verificationInstance = $this->twilioRestService->sendVerificationCode($this->users[$formData['username']]);
         if ($verificationInstance->status === 'pending') {
+            $session->set('username', $formData['username']);
             return new RedirectResponse('/verify');
         }
     }
