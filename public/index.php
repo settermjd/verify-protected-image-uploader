@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Handler\LoginHandler;
 use App\Handler\UploadHandler;
 use App\Handler\VerifyHandler;
+use App\Service\TwilioVerificationService;
 use Asgrim\MiniMezzio\AppFactory;
 use Dotenv\Dotenv;
 use Laminas\ConfigAggregator\ConfigAggregator;
@@ -20,6 +21,7 @@ use Mezzio\Session\ConfigProvider as MezzioSessionConfigProvider;
 use Mezzio\Session\Ext\ConfigProvider as MezzioSessionExtConfigProvider;
 use Mezzio\Session\SessionMiddleware;
 use Mezzio\Twig\ConfigProvider as MezzioTwigConfigProvider;
+use Twilio\Rest\Client;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -67,6 +69,16 @@ $container                          = new ServiceManager($dependencies);
 $container->addAbstractFactory(new ReflectionBasedAbstractFactory());
 $container->setFactory(RouterInterface::class, static function () {
     return new FastRouteRouter();
+$container->setFactory(TwilioVerificationService::class, new class {
+    public function __invoke(ContainerInterface $container): TwilioVerificationService
+    {
+        $client = new Client(
+            $_ENV['TWILIO_ACCOUNT_SID'],
+            $_ENV['TWILIO_AUTH_TOKEN'],
+        );
+        return new TwilioVerificationService($client, $_ENV['VERIFY_SERVICE_SID']);
+    }
+});
 });
 
 $app = AppFactory::create($container, $container->get(RouterInterface::class));
