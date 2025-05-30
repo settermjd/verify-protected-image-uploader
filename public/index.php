@@ -38,7 +38,7 @@ $dotenv->required([
     'YOUR_USERNAME',
 ]);
 
-$config                             = new ConfigAggregator([
+$config                                       = new ConfigAggregator([
     MezzioTwigConfigProvider::class,
     MezzioSessionConfigProvider::class,
     MezzioSessionExtConfigProvider::class,
@@ -59,18 +59,17 @@ $config                             = new ConfigAggregator([
         }
     },
 ])->getMergedConfig();
-$dependencies                       = $config['dependencies'];
-$dependencies['services']['config'] = $config;
+$dependencies                                 = $config['dependencies'];
+$dependencies['services']['config']           = $config;
 $dependencies['services']['config']['upload'] = [
     'upload_dir' => __DIR__ . '/../' . $_SERVER['UPLOAD_DIRECTORY'],
 ];
 $dependencies['services']['config']['users']  = [
     $_SERVER['YOUR_USERNAME'] => $_SERVER['YOUR_PHONE_NUMBER'],
 ];
-$container                          = new ServiceManager($dependencies);
+$container                                    = new ServiceManager($dependencies);
 $container->addAbstractFactory(new ReflectionBasedAbstractFactory());
-$container->setFactory(RouterInterface::class, static function () {
-    return new FastRouteRouter();
+$container->setFactory(RouterInterface::class, fn() => new FastRouteRouter());
 $container->setFactory(TwilioVerificationService::class, new class {
     public function __invoke(ContainerInterface $container): TwilioVerificationService
     {
