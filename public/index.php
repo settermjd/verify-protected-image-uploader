@@ -20,7 +20,9 @@ use Mezzio\Router\RouterInterface;
 use Mezzio\Session\ConfigProvider as MezzioSessionConfigProvider;
 use Mezzio\Session\Ext\ConfigProvider as MezzioSessionExtConfigProvider;
 use Mezzio\Session\SessionMiddleware;
+use Mezzio\Template\TemplateRendererInterface;
 use Mezzio\Twig\ConfigProvider as MezzioTwigConfigProvider;
+use Psr\Container\ContainerInterface;
 use Twilio\Rest\Client;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -79,6 +81,37 @@ $container->setFactory(TwilioVerificationService::class, new class {
         return new TwilioVerificationService($client, $_ENV['VERIFY_SERVICE_SID']);
     }
 });
+
+$container->setFactory(LoginHandler::class, new class {
+    public function __invoke(ContainerInterface $container): LoginHandler
+    {
+        return new LoginHandler(
+            $container->get(TemplateRendererInterface::class),
+            $container->get(TwilioVerificationService::class),
+            $container->get('config')['users'],
+        );
+    }
+});
+
+$container->setFactory(VerifyHandler::class, new class {
+    public function __invoke(ContainerInterface $container): VerifyHandler
+    {
+        return new VerifyHandler(
+            $container->get(TemplateRendererInterface::class),
+            $container->get(TwilioVerificationService::class),
+            $container->get('config')['users'],
+        );
+    }
+});
+
+$container->setFactory(UploadHandler::class, new class {
+    public function __invoke(ContainerInterface $container): UploadHandler
+    {
+        return new UploadHandler(
+            $container->get(TemplateRendererInterface::class),
+            $container->get('config')['upload'],
+        );
+    }
 });
 
 $app = AppFactory::create($container, $container->get(RouterInterface::class));
