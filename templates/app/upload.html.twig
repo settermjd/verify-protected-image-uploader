@@ -6,10 +6,12 @@
 
 {% block content %}
     <section class="text-slate-700/75 mt-6">
-        <div class="hidden mt-4 flex flex-row gap-x-2 items-center p-3 border-0 border-green-300 bg-green-100 rounded-md text-green-700">
+        {% if status is defined %}
+        <div class="mt-4 flex flex-row gap-x-2 items-center p-3 border-0 border-green-300 bg-green-100 rounded-md text-green-700">
             <img src="/images/icons/success.png" alt="success icon" width="32" height="32">
-            <p class="">Image was successfully uploaded</p>
+            <p class="">{{ status }}</p>
         </div>
+        {% endif %}
         <div class="hidden mt-4 flex flex-row gap-x-2 items-center p-3 border-0 border-red-300 bg-red-100 rounded-md text-red-700">
             <img src="/images/icons/cancel.png" alt="upload fail icon" width="32" height="32">
             <p class="">Image could not be uploaded</p>

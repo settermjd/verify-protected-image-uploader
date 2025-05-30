@@ -20,6 +20,8 @@ use const UPLOAD_ERR_OK;
 
 readonly class UploadHandler implements RequestHandlerInterface
 {
+    use FlashMessagesTrait;
+
     public function __construct(
         private TemplateRendererInterface $renderer,
         private array $uploadConfig = [],
@@ -32,7 +34,10 @@ readonly class UploadHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         if ($request->getMethod() === 'GET') {
-            return new HtmlResponse($this->renderer->render('app::upload', []));
+            $status = $this->getFlash($request, 'status');
+            return new HtmlResponse($this->renderer->render('app::upload', [
+                'status' => $status,
+            ]));
         }
 
         $formData = $request->getUploadedFiles();
@@ -50,6 +55,7 @@ readonly class UploadHandler implements RequestHandlerInterface
 
         try {
             $file->moveTo($this->uploadConfig['upload_dir'] . $file->getClientFilename());
+            $this->setFlash($request, 'status', 'Image uploaded successfully');
         } catch (InvalidArgumentException | RuntimeException $e) {
             return new RedirectResponse('/upload');
         }

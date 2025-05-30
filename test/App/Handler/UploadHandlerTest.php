@@ -10,6 +10,8 @@ use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Laminas\Diactoros\Stream;
 use Laminas\Diactoros\UploadedFile;
+use Mezzio\Flash\FlashMessageMiddleware;
+use Mezzio\Flash\FlashMessagesInterface;
 use Mezzio\Template\TemplateRendererInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
@@ -35,27 +37,42 @@ use const UPLOAD_ERR_PARTIAL;
 
 class UploadHandlerTest extends TestCase
 {
-    private TemplateRendererInterface&MockObject $template;
+    private FlashMessagesInterface&MockObject $flashMessage;
     private ServerRequestInterface&MockObject $request;
+    private TemplateRendererInterface&MockObject $template;
 
     public function setUp(): void
     {
-        $this->template = $this->createMock(TemplateRendererInterface::class);
-        $this->request  = $this->createMock(ServerRequestInterface::class);
+        $this->flashMessage = $this->createMock(FlashMessagesInterface::class);
+        $this->request      = $this->createMock(ServerRequestInterface::class);
+        $this->template     = $this->createMock(TemplateRendererInterface::class);
     }
 
     public function testRendersTemplateOnGetRequest(): void
     {
+        $status = 'Image uploaded successfully';
+
         $this->template
             ->expects($this->once())
             ->method('render')
-            ->with('app::upload', [])
+            ->with('app::upload', ['status' => $status])
             ->willReturn('');
 
         $this->request
             ->expects($this->once())
             ->method('getMethod')
             ->willReturn('GET');
+        $this->request
+            ->expects($this->once())
+            ->method('getAttribute')
+            ->with(FlashMessageMiddleware::FLASH_ATTRIBUTE)
+            ->willReturn($this->flashMessage);
+
+        $this->flashMessage
+            ->expects($this->once())
+            ->method('getFlash')
+            ->with('status')
+            ->willReturn($status);
 
         $response = new UploadHandler($this->template)->handle($this->request);
         $this->assertInstanceOf(HtmlResponse::class, $response);
@@ -67,6 +84,16 @@ class UploadHandlerTest extends TestCase
             ->expects($this->once())
             ->method('getMethod')
             ->willReturn('POST');
+        $this->request
+            ->expects($this->once())
+            ->method('getAttribute')
+            ->with(FlashMessageMiddleware::FLASH_ATTRIBUTE)
+            ->willReturn($this->flashMessage);
+
+        $this->flashMessage
+            ->expects($this->once())
+            ->method('flash')
+            ->with('status', 'Image uploaded successfully');
 
         $filename = __DIR__ . '/../../data/files/upload.png';
         $fhandle  = fopen($filename, 'r');
