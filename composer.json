@@ -41,7 +41,7 @@
         "cs-fix": "phpcbf",
         "serve": [
             "Composer\\Config::disableProcessTimeout",
-            "php -S 0.0.0.0:8080 -t public/"
+            "php -d upload_max_filesize=5242880 -d post_max_size=7340032 -S 0.0.0.0:8080 -t public/"
         ],
         "static-analysis": "phpstan analyse --memory-limit=256M --level=7 src test",
         "test": "phpunit --colors=always"
