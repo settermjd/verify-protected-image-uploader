@@ -57,6 +57,12 @@ $config                             = new ConfigAggregator([
 ])->getMergedConfig();
 $dependencies                       = $config['dependencies'];
 $dependencies['services']['config'] = $config;
+$dependencies['services']['config']['upload'] = [
+    'upload_dir' => __DIR__ . '/../' . $_SERVER['UPLOAD_DIRECTORY'],
+];
+$dependencies['services']['config']['users']  = [
+    $_SERVER['YOUR_USERNAME'] => $_SERVER['YOUR_PHONE_NUMBER'],
+];
 $container                          = new ServiceManager($dependencies);
 $container->addAbstractFactory(new ReflectionBasedAbstractFactory());
 $container->setFactory(RouterInterface::class, static function () {
