@@ -6,6 +6,7 @@ use App\Handler\LoginHandler;
 use App\Handler\UploadHandler;
 use App\Handler\VerifyHandler;
 use Asgrim\MiniMezzio\AppFactory;
+use Dotenv\Dotenv;
 use Laminas\ConfigAggregator\ConfigAggregator;
 use Laminas\ServiceManager\AbstractFactory\ReflectionBasedAbstractFactory;
 use Laminas\ServiceManager\ServiceManager;
@@ -21,6 +22,17 @@ use Mezzio\Session\SessionMiddleware;
 use Mezzio\Twig\ConfigProvider as MezzioTwigConfigProvider;
 
 require __DIR__ . '/../vendor/autoload.php';
+
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+$dotenv->required([
+    'TWILIO_ACCOUNT_SID',
+    'TWILIO_AUTH_TOKEN',
+    'VERIFY_SERVICE_SID',
+    'UPLOAD_DIRECTORY',
+    'YOUR_PHONE_NUMBER',
+    'YOUR_USERNAME',
+]);
 
 $config                             = new ConfigAggregator([
     MezzioTwigConfigProvider::class,
