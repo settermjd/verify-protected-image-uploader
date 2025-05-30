@@ -9,16 +9,24 @@ use Asgrim\MiniMezzio\AppFactory;
 use Laminas\ConfigAggregator\ConfigAggregator;
 use Laminas\ServiceManager\AbstractFactory\ReflectionBasedAbstractFactory;
 use Laminas\ServiceManager\ServiceManager;
+use Mezzio\Flash\ConfigProvider as MezzioFlashConfigProvider;
+use Mezzio\Flash\FlashMessageMiddleware;
 use Mezzio\Router\FastRouteRouter;
 use Mezzio\Router\Middleware\DispatchMiddleware;
 use Mezzio\Router\Middleware\RouteMiddleware;
 use Mezzio\Router\RouterInterface;
+use Mezzio\Session\ConfigProvider as MezzioSessionConfigProvider;
+use Mezzio\Session\Ext\ConfigProvider as MezzioSessionExtConfigProvider;
+use Mezzio\Session\SessionMiddleware;
 use Mezzio\Twig\ConfigProvider as MezzioTwigConfigProvider;
 
 require __DIR__ . '/../vendor/autoload.php';
 
 $config                             = new ConfigAggregator([
     MezzioTwigConfigProvider::class,
+    MezzioSessionConfigProvider::class,
+    MezzioSessionExtConfigProvider::class,
+    MezzioFlashConfigProvider::class,
     new class ()
     {
         public function __invoke(): array
@@ -45,6 +53,8 @@ $container->setFactory(RouterInterface::class, static function () {
 
 $app = AppFactory::create($container, $container->get(RouterInterface::class));
 $app->pipe(RouteMiddleware::class);
+$app->pipe(SessionMiddleware::class);
+$app->pipe(FlashMessageMiddleware::class);
 $app->pipe(DispatchMiddleware::class);
 
 /**

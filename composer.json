@@ -6,6 +6,7 @@
         "laminas/laminas-config-aggregator": "^1.18",
         "laminas/laminas-servicemanager": "^4.4",
         "mezzio/mezzio-fastroute": "^3.13",
+        "mezzio/mezzio-flash": "^1.9",
         "mezzio/mezzio-session": "^1.16",
         "mezzio/mezzio-session-ext": "^1.20",
         "mezzio/mezzio-twigrenderer": "^2.17",

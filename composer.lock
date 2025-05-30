@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "28e4bb2daa8852175bcc211ca9d536de",
+    "content-hash": "f173fc8cfe54f2e09b7e84d74d334260",
     "packages": [
         {
             "name": "asgrim/mini-mezzio",
@@ -979,6 +979,76 @@
                 }
             ],
             "time": "2025-04-27T12:05:55+00:00"
+        },
+        {
+            "name": "mezzio/mezzio-flash",
+            "version": "1.9.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mezzio/mezzio-flash.git",
+                "reference": "366439125d4b015439e468a59c32f91099ecf0b5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mezzio/mezzio-flash/zipball/366439125d4b015439e468a59c32f91099ecf0b5",
+                "reference": "366439125d4b015439e468a59c32f91099ecf0b5",
+                "shasum": ""
+            },
+            "require": {
+                "mezzio/mezzio-session": "^1.0",
+                "php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0",
+                "psr/http-server-middleware": "^1.0"
+            },
+            "conflict": {
+                "zendframework/zend-expressive-flash": "*"
+            },
+            "require-dev": {
+                "laminas/laminas-coding-standard": "~2.5.0",
+                "phpunit/phpunit": "^10.5.36",
+                "psalm/plugin-phpunit": "^0.19.0",
+                "vimeo/psalm": "^5.26.1"
+            },
+            "type": "library",
+            "extra": {
+                "laminas": {
+                    "config-provider": "Mezzio\\Flash\\ConfigProvider"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Mezzio\\Flash\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Flash messages for PSR-7 and PSR-15 applications using mezzio-session",
+            "homepage": "https://mezzio.dev",
+            "keywords": [
+                "flash",
+                "laminas",
+                "mezzio",
+                "middleware",
+                "psr-15",
+                "psr-7",
+                "session"
+            ],
+            "support": {
+                "chat": "https://laminas.dev/chat",
+                "docs": "https://docs.mezzio.dev/mezzio-flash/",
+                "forum": "https://discourse.laminas.dev",
+                "issues": "https://github.com/mezzio/mezzio-flash/issues",
+                "rss": "https://github.com/mezzio/mezzio-flash/releases.atom",
+                "source": "https://github.com/mezzio/mezzio-flash"
+            },
+            "funding": [
+                {
+                    "url": "https://funding.communitybridge.org/projects/laminas-project",
+                    "type": "community_bridge"
+                }
+            ],
+            "time": "2024-10-16T21:13:18+00:00"
         },
         {
             "name": "mezzio/mezzio-helpers",
